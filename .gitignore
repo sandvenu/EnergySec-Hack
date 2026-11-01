@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+runtime/
+runtime_gateway.log
+twin_data/
+reports/*.json
+!reports/.keep
+.env
+.pytest_cache/

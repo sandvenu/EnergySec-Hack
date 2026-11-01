@@ -1,0 +1,40 @@
+{
+  "rapp_id": "energy-saving-rl",
+  "vendor": "HCLTech",
+  "version": "0.2",
+  "purpose": "Energy agent: reduce energy by switching low-load cells off",
+  "requested_actions": [
+    "read_kpi",
+    "what_if",
+    "set_tilt",
+    "cell_off",
+    "cell_on"
+  ],
+  "requested_cells": "all",
+  "max_cells_per_tick": 3,
+  "reads_untrusted_input": false,
+  "autonomy_tier": "supervised",
+  "intent": {
+    "owner": "RAN energy team",
+    "goal": "Minimise network energy use whenever traffic allows",
+    "objective": {
+      "kpi": "energy_saving_pct",
+      "direction": "maximize"
+    },
+    "guards": [
+      {
+        "kpi": "weak_coverage_pct",
+        "max_increase": 8,
+        "why": "energy saving must not cost more than 8 points of coverage"
+      }
+    ]
+  },
+  "model": {
+    "registry": "sagemaker",
+    "package_group": "trusted-rapp-energy-saver-ppo"
+  },
+  "model_budget": {
+    "max_tokens_per_run": 250000,
+    "max_usd_per_day": 5.0
+  }
+}

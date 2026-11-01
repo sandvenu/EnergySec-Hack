@@ -1,0 +1,15 @@
+{
+  "app": ".venv\\Scripts\\python.exe app.py",
+  "context": {
+    "region": "us-east-1",
+    "modelProvider": "anthropic",
+    "anthropicModelId": "claude-opus-5-5",
+    "modelId": "us.anthropic.claude-opus-5-5",
+    "hostInstanceType": "t3.xlarge",
+    "policyMode": "ENFORCE",
+    "ledgerRetentionDays": 1,
+    "deployRuntimes": true,
+    "budgetEmail": "",
+    "monthlyBudgetUsd": 100
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "_note": "Operator hard floors (service management): an action whose predicted outcome breaks one is denied outright. Intents' own guards escalate to a human instead.",
+  "weak_coverage_pct": {"max": 45, "policy_id": "FLOOR-WEAK-COVERAGE"},
+  "max_cell_load": {"max": 400, "policy_id": "FLOOR-CELL-LOAD"}
+}

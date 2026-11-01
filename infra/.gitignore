@@ -1,0 +1,5 @@
+.venv/
+cdk.out/
+build/
+synth_*/
+cdk.out.*/

@@ -1,0 +1,21 @@
+<section id="model" data-transition="fade" style="background:#0F1B2D;color:#F4F3EE;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:64px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#6CB2EE;letter-spacing:2px;text-transform:uppercase">What we measured</p>
+<h2 style="font-size:72px;font-weight:600;line-height:1.1;width:1500px">A strong model often protects itself. Not reliably.</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:120px;font-weight:700;line-height:1;color:#6CB2EE">4 of 5</p>
+<p style="font-size:32px;line-height:1.35;color:#B9C5D2">injection attacks Claude refused on its own, with every defense switched off</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:120px;font-weight:700;line-height:1;color:#F2914F">2 of 3</p>
+<p style="font-size:32px;line-height:1.35;color:#B9C5D2">rehearsal runs where a forged change ticket made it switch off the hub cell</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:120px;font-weight:700;line-height:1;color:#F4F3EE">0</p>
+<p style="font-size:32px;line-height:1.35;color:#B9C5D2">harmful changes that ran with our framework on, in any run</p>
+</div>
+</div>
+<p style="font-size:44px;line-height:1.3;color:#F4F3EE;width:1500px">The model is not the control. The boundary is.</p>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#B9C5D2">Strands vendor agent on Claude Opus 5.5 · TelcoAgentBench and D1–D5 rehearsals, Oct 22 2026 · 03</p>
+<aside>This is the finding that shaped the design. Claude refused the crude attacks, the “ignore previous instructions” kind, even with all our defenses off, and it reported them. But a plausible forged maintenance ticket, approved-looking, with no trigger words, made it switch off the busiest critical cell in two of three rehearsal runs. Its behaviour varies run to run. With the framework on, nothing harmful ran in any run. So the security claim cannot rest on the model’s judgement; it has to be enforced outside the model.</aside>
+</section>

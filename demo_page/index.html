@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trusted rApp Framework</title>
+<style>
+:root {
+  --bg: #0f1419; --panel: #161c23; --panel-2: #1c242d; --line: #2a3440; --text: #e6edf3; --muted: #8b98a5;
+  --accent: #4ea1ff; --allow: #3fb950; --deny: #f85149; --hold: #d29922; --info: #a371f7;
+  --crit: #f85149; --med: #d29922; --low: #3fb950; --off: #4b5563;
+  --ue-good: #3fb950; --ue-mid: #d29922; --ue-weak: #f85149;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f6f8fa; --panel: #ffffff; --panel-2: #f3f5f7; --line: #d0d7de; --text: #1f2328; --muted: #59636e;
+    --accent: #0969da; --allow: #1a7f37; --deny: #cf222e; --hold: #9a6700; --info: #8250df;
+    --crit: #cf222e; --med: #9a6700; --low: #1a7f37; --off: #afb8c1;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, "Segoe UI", sans-serif; }
+header { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--panel); position: sticky; top: 0; z-index: 5; }
+header h1 { font-size: 16px; margin: 0; font-weight: 650; }
+header .sub { color: var(--muted); font-size: 12px; }
+.spacer { flex: 1; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; background: var(--panel-2); white-space: nowrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.ok .dot { background: var(--allow); } .bad .dot { background: var(--deny); } .warn .dot { background: var(--hold); }
+.toggle { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; font-size: 13px; }
+.toggle input { accent-color: var(--accent); width: 16px; height: 16px; }
+main { display: grid; grid-template-columns: 300px minmax(0, 1fr) 360px; gap: 16px; padding: 16px 20px; }
+@media (max-width: 1250px) { main { grid-template-columns: 1fr 1fr; } .col-map { grid-column: 1 / -1; order: -1; } }
+@media (max-width: 760px) { main { grid-template-columns: 1fr; padding: 12px 16px; } header { padding: 10px 16px; } }
+section.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 16px; min-width: 0; }
+section.card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+section.card h2 .right { margin-left: auto; text-transform: none; letter-spacing: 0; }
+button { font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px; padding: 6px 12px; cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: .5; cursor: default; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.good { background: var(--allow); border-color: var(--allow); color: #fff; }
+button.danger { background: var(--deny); border-color: var(--deny); color: #fff; }
+.steps { display: grid; gap: 8px; }
+.step { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: start; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-2); }
+.step button { padding: 6px 0; font-weight: 650; }
+.step .t { font-weight: 600; } .step .d { color: var(--muted); font-size: 12px; }
+.step .res { font-size: 12px; margin-top: 6px; overflow-wrap: anywhere; }
+.step.pass { border-color: var(--allow); } .step.fail { border-color: var(--deny); }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+@media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+.kpi { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+.kpi .v { font-size: 22px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.kpi .l { font-size: 11px; color: var(--muted); }
+.map-wrap { position: relative; }
+svg#map { width: 100%; height: auto; display: block; background: var(--panel-2); border-radius: 8px; border: 1px solid var(--line); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); margin-top: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.radius-ctl { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.seg button { border-radius: 0; margin-left: -1px; } .seg button:first-child { border-radius: 7px 0 0 7px; } .seg button:last-child { border-radius: 0 7px 7px 0; }
+.seg button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; position: sticky; top: 0; background: var(--panel); }
+tbody tr { cursor: pointer; } tbody tr:hover { background: var(--panel-2); }
+tr.fresh { animation: flash 1.6s ease-out; }
+@keyframes flash { from { background: color-mix(in srgb, var(--accent) 30%, transparent); } to { background: transparent; } }
+.log { max-height: 420px; overflow: auto; }
+.chip { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .03em; border: 1px solid currentColor; }
+.c-allow, .c-admit, .c-approve { color: var(--allow); } .c-deny, .c-refuse, .c-reject, .c-kill { color: var(--deny); }
+.c-hold { color: var(--hold); } .c-screen { color: var(--info); } .c-cls { color: var(--accent); }
+.c-recover { color: var(--allow); } .c-incident, .c-recover_refused, .c-S1, .c-S2 { color: var(--deny); }
+.c-contain, .c-suspended, .c-S3, .c-review, .c-contained { color: var(--hold); } .c-trace, .c-S4, .c-logged { color: var(--info); }
+.c-recovered { color: var(--allow); }
+.ir-counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+.ir-counts .kpi .v { font-size: 18px; }
+.ir-row { border-top: 1px solid var(--line); padding: 8px 0; font-size: 12.5px; display: grid; gap: 4px; }
+.ir-row:first-child { border-top: 0; }
+.ir-row .row button { padding: 3px 10px; font-size: 12px; }
+.sess { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line); font-size: 12px; }
+.sess button { padding: 3px 10px; font-size: 12px; }
+a.ev { font-size: 12px; }
+dialog.wide { max-width: min(1150px, 96vw); }
+dialog.wide iframe { width: 100%; height: 78vh; border: 0; display: block; background: var(--bg); }
+.mono { font-family: var(--mono); font-size: 12px; }
+.muted { color: var(--muted); }
+.pid { font-family: var(--mono); font-size: 11.5px; color: var(--accent); }
+.approval { border: 1px solid var(--hold); border-radius: 8px; padding: 12px; background: color-mix(in srgb, var(--hold) 8%, var(--panel)); }
+.bars { display: grid; gap: 8px; margin: 10px 0; }
+.bar { display: grid; grid-template-columns: 110px 1fr 90px; gap: 8px; align-items: center; font-size: 12px; }
+.bar .track { height: 14px; background: var(--panel-2); border-radius: 4px; position: relative; overflow: hidden; border: 1px solid var(--line); }
+.bar .b { position: absolute; top: 0; bottom: 0; left: 0; }
+.bar .b.before { background: var(--muted); opacity: .55; height: 50%; }
+.bar .b.after { background: var(--hold); top: 50%; height: 50%; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.out { font-family: var(--mono); font-size: 12px; white-space: pre-wrap; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin-top: 8px; max-height: 160px; overflow: auto; }
+.out .okl { color: var(--allow); } .out .faill { color: var(--deny); }
+.rapp { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.rapp:last-child { border-bottom: 0; }
+.rapp .n { font-weight: 600; } .rapp .s { font-size: 12px; color: var(--muted); grid-column: 1; }
+.screen-ev { border-left: 3px solid var(--info); padding: 6px 10px; margin-bottom: 8px; background: var(--panel-2); border-radius: 0 6px 6px 0; font-size: 12px; }
+.screen-ev .txt { color: var(--muted); margin-top: 4px; }
+mark { background: color-mix(in srgb, var(--deny) 30%, transparent); color: inherit; border-radius: 2px; padding: 0 2px; }
+dialog { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 10px; max-width: min(760px, 92vw); width: 100%; padding: 0; }
+dialog::backdrop { background: rgba(0,0,0,.5); }
+dialog .hd { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+dialog pre { margin: 0; padding: 16px; max-height: 70vh; overflow: auto; font-family: var(--mono); font-size: 12px; }
+#toast { position: fixed; bottom: 16px; right: 16px; max-width: 420px; background: var(--deny); color: #fff; padding: 10px 14px; border-radius: 8px; display: none; z-index: 10; }
+.replay-banner { display: none; background: var(--info); color: #fff; padding: 6px 20px; font-size: 13px; }
+body.replay .replay-banner { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+body.replay .live-only { opacity: .45; pointer-events: none; }
+input[type=range] { width: 240px; max-width: 100%; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Trusted rApp Framework</h1>
+    <div class="sub">Agent governance at the SMO boundary, on the MAVERIC digital twin (15 cells, New York test topology)</div>
+  </div>
+  <div class="spacer"></div>
+  <label class="toggle live-only"><input type="checkbox" id="t-enf" checked> Enforcement</label>
+  <label class="toggle live-only"><input type="checkbox" id="t-scr" checked> Screening</label>
+  <span class="pill" id="p-tick"><span class="dot"></span> tick –</span>
+  <span class="pill" id="p-twin"><span class="dot"></span> twin</span>
+  <span class="pill" id="p-ledger"><span class="dot"></span> ledger –</span>
+  <span class="pill" id="p-agents"><span class="dot"></span> agents –</span>
+  <span class="pill" id="p-ir" title="Incidents and near-misses (NIST key practices 2.1)"><span class="dot"></span> incidents –</span>
+  <button id="b-replay">Replay mode</button>
+</header>
+<div class="replay-banner" id="replay-banner">
+  <strong>Replay mode</strong><span id="replay-info"></span>
+  <input type="range" id="replay-slider" min="0" max="0" value="0">
+  <span id="replay-pos" class="mono"></span>
+  <button id="b-replay-play">Play</button>
+</div>
+
+<main>
+  <!-- left: steps + rApps -->
+  <div class="col-left">
+    <section class="card live-only">
+      <h2>Demo steps <span class="right"><button id="b-runall" class="primary">Run D1–D6</button></span></h2>
+      <div class="steps" id="steps"></div>
+    </section>
+    <section class="card">
+      <h2>Agents and kill switch</h2>
+      <div id="rapps"><div class="muted">No agents admitted yet. Run D1.</div></div>
+      <div id="kill-out" class="muted" style="font-size:12px;margin-top:6px"></div>
+    </section>
+    <section class="card">
+      <h2>Screening <span class="right muted" style="font-size:12px">untrusted input</span></h2>
+      <div id="screening"><div class="muted">No flagged input.</div></div>
+    </section>
+  </div>
+
+  <!-- centre: KPIs + map + log -->
+  <div class="col-map">
+    <section class="card">
+      <h2>Network on the twin <span class="right muted" id="kpi-note" style="font-size:12px"></span></h2>
+      <div class="kpis">
+        <div class="kpi"><div class="v" id="k-weak">–</div><div class="l">Weak coverage (UEs)</div></div>
+        <div class="kpi"><div class="v" id="k-energy">–</div><div class="l">Energy saving (cells off)</div></div>
+        <div class="kpi"><div class="v" id="k-active">–</div><div class="l">Active cells</div></div>
+        <div class="kpi"><div class="v" id="k-rsrp">–</div><div class="l">Mean RSRP, dBm</div></div>
+      </div>
+      <div class="radius-ctl" style="margin-bottom:8px">
+        <span class="muted" style="font-size:12px">Blast radius:</span>
+        <span class="seg" id="radius-seg"><button data-r="" class="on">none</button></span>
+        <span class="seg" id="radius-act"></span>
+      </div>
+      <div class="map-wrap"><svg id="map" viewBox="0 0 800 520" role="img" aria-label="Cell map"></svg></div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--low)"></i>low</span>
+        <span><i class="sw" style="background:var(--med)"></i>medium</span>
+        <span><i class="sw" style="background:var(--crit)"></i>critical</span>
+        <span><i class="sw" style="background:var(--off)"></i>cell OFF</span>
+        <span><i class="sw" style="background:var(--ue-weak);border-radius:50%"></i>UE weak</span>
+        <span><i class="sw" style="background:var(--ue-good);border-radius:50%"></i>UE covered</span>
+        <span id="radius-legend"></span>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Decision log <span class="right"><span class="muted" style="font-size:12px" id="log-count"></span></span></h2>
+      <div class="log"><table>
+        <thead><tr><th>#</th><th>Time</th><th>rApp</th><th>Decision</th><th>Policy</th><th>Actions</th><th>Tier</th><th>Why (rApp's stated reason)</th></tr></thead>
+        <tbody id="log"></tbody>
+      </table></div>
+    </section>
+  </div>
+
+  <!-- right: approval + ledger + settings -->
+  <div class="col-right">
+    <section class="card">
+      <h2>Approval queue <span class="right muted" style="font-size:12px">high tier waits for a human</span></h2>
+      <div id="approvals"><div class="muted">Nothing waiting.</div></div>
+    </section>
+    <section class="card">
+      <h2>Incidents and evidence <span class="right muted" style="font-size:12px">NIST incident readiness</span></h2>
+      <div class="ir-counts">
+        <div class="kpi"><div class="v" id="ir-inc">0</div><div class="l">incidents</div></div>
+        <div class="kpi"><div class="v" id="ir-nm">0</div><div class="l">near-misses</div></div>
+        <div class="kpi"><div class="v" id="ir-cont">0</div><div class="l">contained</div></div>
+        <div class="kpi"><div class="v" id="ir-rec">0</div><div class="l">recovered</div></div>
+      </div>
+      <div id="incidents"><div class="muted">No incident or near-miss yet.</div></div>
+      <h2 style="margin-top:14px">Sessions <span class="right muted" style="font-size:12px">signed evidence per session</span></h2>
+      <div id="sessions"><div class="muted">No agent session yet.</div></div>
+    </section>
+    <section class="card">
+      <h2>Signed ledger</h2>
+      <div class="row">
+        <button id="b-verify">Verify offline</button>
+        <button id="b-tamper">Verify a tampered copy</button>
+        <a id="a-download" href="/ops/ledger/download" class="muted" style="font-size:12px">download chain</a>
+      </div>
+      <div class="out" id="ledger-out" style="display:none"></div>
+    </section>
+    <section class="card live-only">
+      <h2>Fail-closed tests (NF-1)</h2>
+      <div class="row" id="faults"></div>
+      <div class="muted" style="font-size:12px;margin-top:6px">Make a dependency unavailable; every action is then denied.</div>
+    </section>
+    <section class="card live-only">
+      <h2>Operator</h2>
+      <div class="row">
+        <button id="b-reset">Reset twin</button>
+        <label class="muted" style="font-size:12px">tick <select id="s-tick"></select></label>
+        <button id="b-agent">Run RL agent</button>
+      </div>
+      <div class="out" id="op-out" style="display:none"></div>
+    </section>
+  </div>
+</main>
+
+<dialog id="dlg"><div class="hd"><strong id="dlg-title">Record</strong><span class="spacer"></span><button id="dlg-close">Close</button></div><pre id="dlg-body"></pre></dialog>
+<dialog id="ev-dlg" class="wide"><div class="hd"><strong id="ev-title">Evidence</strong><span class="spacer"></span>
+  <a id="ev-open" target="_blank" class="muted" style="font-size:12px;margin-right:12px">open in new tab</a>
+  <a id="ev-json" class="muted" style="font-size:12px;margin-right:12px">download signed JSON</a>
+  <button id="ev-close">Close</button></div><iframe id="ev-frame" title="Evidence report"></iframe></dialog>
+<div id="toast"></div>
+
+<script>
+"use strict";
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const S = { overview: null, map: null, radius: null, radiusSel: "", radiusAct: "cell_off", lastSeq: 0, lastEvent: 0,
+            records: [], replay: null, mapBusy: false, mapDirty: true, stepResults: {} };
+
+async function api(method, path, body) {
+  const opt = { method, headers: {} };
+  if (body !== undefined) {
+    if (typeof body === "string") { opt.body = body; opt.headers["content-type"] = "text/plain"; }
+    else { opt.body = JSON.stringify(body); opt.headers["content-type"] = "application/json"; }
+  }
+  const r = await fetch(path, opt);
+  const txt = await r.text();
+  let data; try { data = JSON.parse(txt); } catch { data = txt; }
+  if (!r.ok) throw new Error((data && data.detail) || txt || r.statusText);
+  return data;
+}
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.style.display = "block"; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = "none", 6000); }
+function show(title, obj) { $("#dlg-title").textContent = title; $("#dlg-body").textContent = JSON.stringify(obj, null, 2); $("#dlg").showModal(); }
+$("#dlg-close").onclick = () => $("#dlg").close();
+$("#ev-close").onclick = () => $("#ev-dlg").close();
+function evidence(kind, id) {  // kind: session | incident_id
+  const q = `${kind}=${encodeURIComponent(id)}`;
+  $("#ev-title").textContent = `Evidence · ${id}`;
+  $("#ev-frame").src = `/ops/evidence/report?${q}`;
+  $("#ev-open").href = `/ops/evidence/report?${q}`;
+  $("#ev-json").href = `/ops/evidence?${q}&download=true`;
+  $("#ev-dlg").showModal();
+}
+document.addEventListener("click", (ev) => {
+  const a = ev.target.closest("[data-ev]"); if (!a) return;
+  ev.preventDefault(); evidence(a.dataset.evk || "session", a.dataset.ev);
+});
+const sevChip = (s) => s ? ` <span class="chip c-${esc(s)}" title="severity">${esc(s)}</span>` : "";
+const evLinks = (ss) => (ss || []).map(s => `<a href="#" class="ev" data-ev="${esc(s)}">evidence ${esc(s)}</a>`).join(" · ");
+const fmtTime = (iso) => iso ? iso.slice(11, 23) : "";
+const actStr = (acts) => (acts || []).map(a => a.cell_id ? `${a.name}:${a.cell_id}${a.tilt !== undefined ? "→" + a.tilt + "°" : ""}` : a.name).join(", ");
+
+// ---------------------------------------------------------------- steps
+const STEPS = [
+  ["D1", "Admit intents", "The energy and load-balancing agents register their intents; a routine night action runs."],
+  ["D2", "Planned event", "A stadium concert from the event calendar; the load-balancing agent rebalances."],
+  ["D3", "Slow drift", "The energy agent switches off lightly loaded cells, one per call."],
+  ["D4", "Workaround", "Refused a busy cell, the energy agent tries to drain it by re-tilting."],
+  ["D5", "Audit and pause", "Verify the ledger, fail a tampered copy, pause the energy agent for the event."],
+  ["D6", "Incident and recovery", "An agent reaches for a canary tool: contained automatically, then the recovery gate."],
+];
+function renderSteps() {
+  $("#steps").innerHTML = STEPS.map(([id, t, d]) => {
+    const r = S.stepResults[id];
+    return `<div class="step ${r ? (r.pass ? "pass" : "fail") : ""}" id="step-${id}">
+      <button data-step="${id}">${id}</button>
+      <div><div class="t">${t}</div><div class="d">${d}</div>${r ? `<div class="res">${r.html}</div>` : ""}</div></div>`;
+  }).join("");
+  document.querySelectorAll("[data-step]").forEach(b => b.onclick = () => runStep(b.dataset.step));
+}
+const ESCALATING = new Set(["Workaround", "Conflicting", "Drift", "High impact", "Floor"]);
+const clsChip = (c) => c ? ` <span class="chip ${ESCALATING.has(c) ? "c-hold" : "c-cls"}">${esc(c)}</span>` : "";
+function judge(id, r) {
+  const pid = (x) => x && x.policy_id ? ` <span class="pid">${esc(x.policy_id)}</span>` : "";
+  const dec = (x) => x ? `<span class="chip c-${esc(x.decision === "pending_approval" ? "hold" : x.decision)}">${esc(x.decision === "pending_approval" ? "held for human" : x.decision)}</span>` : "";
+  const modeTag = r.mode ? `<span class="chip ${r.mode === "agent" ? "c-screen" : ""}" title="${esc(r.mode_note || "")}">${esc(r.mode === "agent" ? "live agent" : "scripted replay")}</span> ` : "";
+  const cost = (u) => u ? ` <span class="muted mono" style="font-style:normal">· ${u.model_calls} model calls, ${u.total_tokens.toLocaleString()} tokens${u.est_cost_usd != null ? ", ~$" + u.est_cost_usd.toFixed(4) : ""}</span>` : "";
+  const said = (run) => run && run.summary ? `<div style="margin-top:4px;font-style:italic">“${esc(run.summary.slice(0, 260))}${run.summary.length > 260 ? "…" : ""}”${cost(run.usage)}</div>` : "";
+  const rows = (rs) => (rs || []).map(x => `<div style="margin-top:6px"><b>${esc(x.label)}</b> → ${dec(x)}${pid(x)}${clsChip(x.class)}${sevChip(x.severity)}${x.settled ? ` <span class="muted">(${esc(x.settled)})</span>` : ""}<div class="muted">${esc((x.why || "").slice(0, 300))}</div></div>`).join("") || `<div class="muted">no change proposed</div>`;
+  const ev = r.sessions && r.sessions.length ? `<div style="margin-top:6px">${evLinks(r.sessions)}</div>` : "";
+  const out = judgeStep(id, r, { pid, dec, modeTag, said, rows });
+  out.html += ev;
+  return out;
+}
+function judgeStep(id, r, { pid, dec, modeTag, said, rows }) {
+  const kpi = (k) => k ? `max cell load <b>${k.max_cell_load}</b> · users above capacity <b>${k.excess_ues}</b> · weak coverage ${k.weak_coverage_pct}%` : "";
+  if (id === "D1") {
+    const g = (a) => esc((a.scope && a.scope.intent && a.scope.intent.goal) || "");
+    return { pass: r.pass, html: `${modeTag}<b>Energy agent</b> admitted: “${g(r.energy_saving)}” · <b>Load-balancing agent</b> admitted: “${g(r.load_balancing)}” · bad card refused: ${esc(r.invalid_card.error || "")}${rows(r.rows)}${said(r.agent_run)}` };
+  }
+  if (id === "D2") {
+    return { pass: r.pass, html: `${modeTag}<b>${esc(r.event.name)}</b> at 20:00, +${r.event.ues} users. Before: ${kpi(r.before)}${rows(r.rows)}<div style="margin-top:6px">Now: ${kpi(r.after)}</div>${said(r.agent_run)}` };
+  }
+  if (id === "D3" || id === "D4") {
+    const bad = (r.guards.guards || []).filter(x => !x.ok).map(x => `${x.owner}: ${x.kpi}`);
+    return { pass: r.pass, html: `${modeTag}${rows(r.rows)}<div style="margin-top:6px">On the network: ${kpi(r.guards.kpis)} · every intent's guards ${r.guards.ok ? '<b style="color:var(--allow)">hold</b>' : '<b style="color:var(--deny)">broken: ' + esc(bad.join(", ")) + "</b>"}</div>${said(r.agent_run)}` };
+  }
+  if (id === "D5") {
+    return { pass: r.pass, html: `ledger <b>${esc(r.ledger.summary)}</b> · tampered copy <b style="color:var(--deny)">FAIL at seq ${r.tampered_copy.tampered_seq}</b> · energy agent paused; its next call ${dec(r.next_call)}${pid(r.next_call)} in ${r.refused_ms_after_kill} ms` };
+  }
+  if (id === "D6") {
+    if (r.error) return { pass: false, html: `<span style="color:var(--deny)">${esc(r.error)}</span>` };
+    const inc = r.incident || {};
+    const rt = (r.recovery && r.recovery.self_test) || [];
+    return { pass: r.pass, html: `${modeTag}${rows([r.trigger])}
+      <div style="margin-top:6px"><b>Contained in ${r.contained_ms} ms:</b> suspended <b>${esc((inc.contained || []).join(", "))}</b>; next calls ${dec(r.lb_next)}${pid(r.lb_next)} · orchestrator ${dec(r.orchestrator_next)}${pid(r.orchestrator_next)}</div>
+      <div style="margin-top:6px"><b>Recovery gate, twin down:</b> <span class="chip c-recover_refused">refused</span> <span class="muted">${esc((r.recovery_refused || {}).reason || "")}</span></div>
+      <div style="margin-top:6px"><b>Recovery gate:</b> <span class="chip c-recover">${esc((r.recovery || {}).decision || "")}</span> self-test ${rt.filter(t => t.ok).length}/${rt.length} · replay ${dec(r.recovery && r.recovery.replay)}${pid(r.recovery && r.recovery.replay)} · resumed ${esc(((r.recovery || {}).resumed || []).join(", "))} · next call ${dec(r.lb_after_recovery)}</div>` };
+  }
+  return { pass: true, html: "" };
+}
+async function runStep(id) {
+  const btns = document.querySelectorAll("[data-step], #b-runall"); btns.forEach(b => b.disabled = true);
+  const el = $(`#step-${id}`); el.classList.remove("pass", "fail");
+  el.querySelector(".d").insertAdjacentHTML("afterend", `<div class="res muted" id="running">running…</div>`);
+  const t0 = performance.now();
+  try {
+    const r = await api("POST", `/ops/demo/${id}`, {});
+    S.stepResults[id] = judge(id, r); S.stepResults[id].raw = r;
+    S.stepResults[id].html += ` <a href="#" data-raw="${id}" class="muted">details</a> <span class="muted">(${((performance.now() - t0) / 1000).toFixed(1)}s)</span>`;
+    if (id === "D5") $("#ledger-out").style.display = "block", $("#ledger-out").innerHTML =
+      `<span class="muted">Live chain:</span>\n<span class="okl">${esc(r.ledger.summary)}</span>\n<span class="muted">Tampered copy (record #${r.tampered_copy.tampered_seq} flipped deny → allow):</span>\n<span class="faill">${esc(r.tampered_copy.fail_lines.join("\n"))}</span>`;
+  } catch (e) { S.stepResults[id] = { pass: false, html: `<span style="color:var(--deny)">${esc(e.message)}</span>` }; }
+  renderSteps();
+  document.querySelectorAll("[data-raw]").forEach(a => a.onclick = (ev) => { ev.preventDefault(); show(a.dataset.raw + " result", S.stepResults[a.dataset.raw].raw); });
+  S.mapDirty = true; await refreshAll();
+  btns.forEach(b => b.disabled = false);
+  return S.stepResults[id];
+}
+$("#b-runall").onclick = async () => {
+  const t0 = performance.now();
+  for (const [id] of STEPS) {
+    const r = await runStep(id);
+    // "Run all" decides held requests itself: approve the rebalancing, reject what breaks another intent.
+    // The live demo uses the approval card's buttons instead.
+    for (const ap of (await api("GET", "/ops/approvals?status=pending")).approvals) {
+      await api("POST", `/ops/approvals/${ap.request_id}`, { approve: id === "D2", approver: "Venugopal (demo approver)" });
+    }
+    if (!r.pass) break;
+  }
+  toast(`D1–D6 finished in ${((performance.now() - t0) / 1000).toFixed(1)} s`);
+};
+
+// ---------------------------------------------------------------- map
+const CRIT_COLOR = { low: "var(--low)", medium: "var(--med)", critical: "var(--crit)" };
+function project(points) {
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const [x, y] of points) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+  const kx = Math.cos(((minY + maxY) / 2) * Math.PI / 180), W = 800, H = 520, pad = 30;
+  const sx = (W - 2 * pad) / ((maxX - minX) * kx || 1), sy = (H - 2 * pad) / ((maxY - minY) || 1), s = Math.min(sx, sy);
+  const ox = (W - (maxX - minX) * kx * s) / 2, oy = (H - (maxY - minY) * s) / 2;
+  return (x, y) => [ox + (x - minX) * kx * s, H - (oy + (y - minY) * s)];
+}
+function wedge(cx, cy, r, az, width = 60) {
+  const a0 = (az - width / 2) * Math.PI / 180, a1 = (az + width / 2) * Math.PI / 180;
+  const p = (a) => [cx + r * Math.sin(a), cy - r * Math.cos(a)];
+  const [x0, y0] = p(a0), [x1, y1] = p(a1);
+  return `M${cx},${cy} L${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 0 1 ${x1.toFixed(1)},${y1.toFixed(1)} Z`;
+}
+function drawMap() {
+  const ov = S.overview, m = S.map; if (!ov || !m || !ov.topology.length) return;
+  const weak = ov.weak_coverage_dbm;
+  const pts = ov.topology.map(c => [c.cell_lon, c.cell_lat]).concat(m.ues.map(u => [u.loc_x, u.loc_y]));
+  const P = project(pts);
+  const radius = S.radiusSel && S.radius ? S.radius[S.radiusSel] : null;
+  const reach = radius ? new Set(((radius.actions[S.radiusAct] || {}).cells) || []) : null;
+  const overflow = radius && radius.overflow ? new Set(radius.overflow.requested.concat(radius.overflow.already)) : null;
+  let svg = `<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--accent)" stroke-width="3"/></pattern></defs>`;
+  svg += `<g>` + m.ues.map(u => { const [x, y] = P(u.loc_x, u.loc_y);
+    const col = u.rsrp_dbm <= weak ? "var(--ue-weak)" : (u.rsrp_dbm <= weak + 8 ? "var(--ue-mid)" : "var(--ue-good)");
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.1" fill="${col}" opacity=".55"/>`; }).join("") + `</g>`;
+  const sites = {};
+  for (const c of ov.topology) { (sites[c.site_id] = sites[c.site_id] || { ...c, cells: [] }).cells.push(c); }
+  for (const s of Object.values(sites)) {
+    const [cx, cy] = P(s.cell_lon, s.cell_lat);
+    for (const c of s.cells) {
+      const st = m.state.cells[c.cell_id], crit = ov.cells[c.cell_id], on = st && st.on;
+      const fill = on ? CRIT_COLOR[crit] : "var(--off)";
+      svg += `<path d="${wedge(cx, cy, 46, c.cell_az_deg)}" fill="${fill}" fill-opacity="${on ? .75 : .35}" stroke="var(--panel)" stroke-width="1.5"><title>${c.cell_id} · ${crit} · ${on ? "ON tilt " + st.tilt + "°" : "OFF"} · ${m.kpis.ues_per_cell[c.cell_id] ?? 0} UEs</title></path>`;
+      if (!on) svg += `<path d="${wedge(cx, cy, 46, c.cell_az_deg)}" fill="none" stroke="var(--muted)" stroke-dasharray="3 3"/>`;
+      if (reach && reach.has(c.cell_id)) svg += `<path d="${wedge(cx, cy, 54, c.cell_az_deg)}" fill="url(#hatch)" fill-opacity=".55" stroke="var(--accent)" stroke-width="2"/>`;
+      if (overflow && overflow.has(c.cell_id)) svg += `<path d="${wedge(cx, cy, 58, c.cell_az_deg)}" fill="none" stroke="var(--deny)" stroke-width="3" stroke-dasharray="6 3"/>`;
+      const a = c.cell_az_deg * Math.PI / 180;
+      svg += `<text x="${(cx + 32 * Math.sin(a)).toFixed(1)}" y="${(cy - 32 * Math.cos(a) + 4).toFixed(1)}" text-anchor="middle" font-size="10" fill="var(--text)" font-family="var(--mono)">${c.cell_id.slice(5)}</text>`;
+    }
+    svg += `<circle cx="${cx}" cy="${cy}" r="5" fill="var(--text)"/><text x="${cx + 8}" y="${cy - 52}" font-size="12" font-weight="600" fill="var(--text)">${esc(s.site_id)}</text>`;
+  }
+  $("#map").innerHTML = svg;
+  const k = m.kpis;
+  $("#k-weak").textContent = k.weak_coverage_pct.toFixed(1) + "%";
+  $("#k-energy").textContent = k.energy_saving_pct.toFixed(1) + "%";
+  $("#k-active").textContent = `${k.active_cells}/15`;
+  $("#k-rsrp").textContent = k.mean_rsrp_dbm == null ? "–" : k.mean_rsrp_dbm.toFixed(1);
+  $("#kpi-note").textContent = `weak = RSRP ≤ ${weak} dBm · tick ${k.tick} · ${m.ues.length} UEs`;
+  $("#radius-legend").innerHTML = radius ? `<i class="sw" style="background:color-mix(in srgb, var(--accent) 45%, transparent);border:2px solid var(--accent)"></i>${esc(S.radiusSel)} may ${esc(S.radiusAct)} (${reach.size} cells, budget ${radius.budget}/tick)` +
+    (radius.overflow ? ` · <span style="color:var(--deny)">budget overflow at tick ${radius.overflow.tick}</span>` : "") : "";
+}
+async function refreshMap() {
+  if (S.mapBusy || S.replay) return; S.mapBusy = true;
+  try { S.map = await api("GET", "/ops/map"); S.mapDirty = false; drawMap(); setPill("#p-twin", "ok", "twin ok"); }
+  catch (e) { setPill("#p-twin", "bad", "twin down"); }
+  finally { S.mapBusy = false; }
+}
+function renderRadiusControls() {
+  const ids = S.radius ? Object.keys(S.radius) : [];
+  $("#radius-seg").innerHTML = [""].concat(ids).map(id => `<button data-r="${id}" class="${S.radiusSel === id ? "on" : ""}">${id || "none"}</button>`).join("");
+  $("#radius-act").innerHTML = S.radiusSel ? ["cell_off", "set_tilt", "cell_on"].map(a => `<button data-a="${a}" class="${S.radiusAct === a ? "on" : ""}">${a}</button>`).join("") : "";
+  document.querySelectorAll("[data-r]").forEach(b => b.onclick = () => { S.radiusSel = b.dataset.r; renderRadiusControls(); drawMap(); });
+  document.querySelectorAll("[data-a]").forEach(b => b.onclick = () => { S.radiusAct = b.dataset.a; renderRadiusControls(); drawMap(); });
+}
+
+// ---------------------------------------------------------------- log, approvals, rApps
+function rowHtml(r, fresh) {
+  const d = r.decision;
+  return `<tr data-seq="${r.seq}" class="${fresh ? "fresh" : ""}"><td class="mono">${r.seq}</td><td class="mono">${fmtTime(r.time)}</td>
+    <td>${esc(r.rapp_id || "–")}</td><td><span class="chip c-${esc(d)}">${esc(d)}</span>${clsChip(r.assessment && r.assessment.class)}${sevChip(r.incident && r.incident.severity)}${r.mode && r.mode.enforcement === false ? ' <span class="muted" title="framework off">(off)</span>' : ""}</td>
+    <td class="pid">${esc(r.policy_id || "")}</td><td class="mono">${esc(actStr(r.actions))}</td><td>${esc(r.tier || "")}</td>
+    <td class="muted" title="${esc(r.justification || "")}">${esc((r.justification || "").slice(0, 70))}${(r.justification || "").length > 70 ? "…" : ""}</td></tr>`;
+}
+function renderLog(fresh = new Set()) {
+  const recs = S.replay ? S.replay.records.slice(0, S.replay.pos) : S.records;
+  $("#log").innerHTML = recs.slice(-300).reverse().map(r => rowHtml(r, fresh.has(r.seq))).join("");
+  $("#log-count").textContent = `${recs.length} records`;
+  document.querySelectorAll("#log tr").forEach(tr => tr.onclick = () => {
+    const r = recs.find(x => x.seq == tr.dataset.seq); show(`Ledger record #${r.seq} (${r.decision})`, r);
+  });
+}
+async function refreshDecisions() {
+  const r = await api("GET", `/ops/decisions?after_seq=${S.lastSeq}`);
+  if (!r.decisions.length) return;
+  const fresh = new Set(r.decisions.map(d => d.seq));
+  S.records = S.records.concat(r.decisions); S.lastSeq = S.records[S.records.length - 1].seq;
+  renderLog(fresh);
+}
+function bar(label, before, after, max, unit = "%") {
+  const w = (v) => Math.max(0, Math.min(100, 100 * v / max));
+  return `<div class="bar"><span>${label}</span><div class="track"><div class="b before" style="width:${w(before)}%"></div><div class="b after" style="width:${w(after)}%"></div></div>
+    <span class="mono">${before.toFixed(1)} → <b>${after.toFixed(1)}</b>${unit}</span></div>`;
+}
+async function refreshApprovals() {
+  const aps = (await api("GET", "/ops/approvals?status=pending")).approvals;
+  const recent = (await api("GET", "/ops/approvals")).approvals.filter(a => a.status !== "pending").slice(0, 3);
+  let html = aps.map(a => {
+    const sh = a.shadow, left = Math.max(0, Math.round(a.deadline - Date.now() / 1000));
+    const as = (a.context || {}).assessment;
+    const broken = as ? (as.guards || []).filter(g => !g.ok) : [];
+    const why = (a.context || {}).reason || (as && as.why) || "";
+    return `<div class="approval"><div class="row"><b>${esc(a.rapp_id)}</b>${clsChip(as && as.class)}<span class="muted mono">${esc(a.request_id)}</span><span class="spacer"></span><span class="pill warn"><span class="dot"></span>${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")} left</span></div>
+      <div class="mono" style="margin-top:6px">${esc(actStr(a.actions))}</div>
+      <div style="font-size:13px;margin-top:8px">${esc(why)}</div>
+      ${broken.length ? `<div style="font-size:12px;margin-top:6px">${broken.map(g => `<div><b>${esc(g.owner)}</b>'s guard ${esc(g.kpi)} ${esc(g.rule || "")}: ${g.before} → <b style="color:var(--deny)">${g.after}</b></div>`).join("")}</div>` : ""}
+      <div class="muted" style="font-size:12px;margin-top:8px">Predicted on the twin (tick ${a.tick}, ${sh.seconds}s) — grey: now, amber: after</div>
+      <div class="bars">${bar("Max cell load", sh.before.max_cell_load, sh.after.max_cell_load, 400, "")}
+        ${bar("Users above capacity", sh.before.excess_ues, sh.after.excess_ues, 300, "")}
+        ${bar("Weak coverage", sh.before.weak_coverage_pct, sh.after.weak_coverage_pct, 100)}
+        ${bar("Energy saving", sh.before.energy_saving_pct, sh.after.energy_saving_pct, 100)}</div>
+      <div class="row"><button class="good" data-ap="${a.request_id}" data-v="1">Approve</button><button class="danger" data-ap="${a.request_id}" data-v="0">Reject</button></div></div>`;
+  }).join("");
+  if (!aps.length) html = `<div class="muted">Nothing waiting.</div>`;
+  if (recent.length) html += `<div class="muted" style="font-size:12px;margin-top:10px">Recent: ` + recent.map(a => `${esc(a.request_id)} <span class="chip c-${a.status === "approved" ? "approve" : "reject"}">${esc(a.status)}</span> by ${esc(a.decided_by)}`).join("<br>") + `</div>`;
+  $("#approvals").innerHTML = html;
+  document.querySelectorAll("[data-ap]").forEach(b => b.onclick = async () => {
+    b.disabled = true;
+    try { await api("POST", `/ops/approvals/${b.dataset.ap}`, { approve: b.dataset.v === "1", approver: "Venugopal (operator)" }); }
+    catch (e) { toast(e.message); }
+    S.mapDirty = true; refreshAll();
+  });
+}
+function renderRapps() {
+  const rs = S.overview.rapps;
+  if (!rs.length) { $("#rapps").innerHTML = `<div class="muted">No agents admitted yet. Run D1.</div>`; return; }
+  $("#rapps").innerHTML = rs.map(r => {
+    const acts = Object.keys(r.scope.actions).join(", ");
+    const revoked = r.status === "revoked";
+    return `<div class="rapp"><div class="n">${esc(r.rapp_id)} <span class="chip ${revoked ? "c-kill" : r.status === "suspended" ? "c-suspended" : "c-allow"}">${esc(r.status)}</span></div>
+      <button class="danger live-only" data-kill="${esc(r.rapp_id)}" ${revoked ? "disabled" : ""}>Kill</button>
+      <div class="s">${esc(r.card.vendor)} · scope: ${esc(acts)} · budget ${r.scope.max_cells_per_tick} cells/tick</div></div>`;
+  }).join("");
+  document.querySelectorAll("[data-kill]").forEach(b => b.onclick = async () => {
+    const t0 = performance.now(); b.disabled = true;
+    try { const r = await api("POST", `/ops/kill/${b.dataset.kill}`); $("#kill-out").textContent = `${b.dataset.kill} revoked in ${(performance.now() - t0).toFixed(0)} ms (ledger #${r.ledger_seq}); its next call is refused.`; }
+    catch (e) { toast(e.message); }
+    refreshAll();
+  });
+}
+async function refreshScreening() {
+  const r = await api("GET", "/ops/alarms");
+  const evs = r.screening_events.slice(-4).reverse();
+  $("#screening").innerHTML = evs.length ? evs.map(e => {
+    let txt = esc(e.text);
+    return `<div class="screen-ev"><b>${esc(e.rapp_id)}</b> read <span class="mono">${esc(e.alarm_id)}</span> · score <b>${e.score}</b> · <span class="mono">${esc(e.matches.join(", "))}</span><div class="txt">${txt}</div><div class="muted">→ quarantined before the LLM saw it</div></div>`;
+  }).join("") : `<div class="muted">No flagged input.</div>`;
+}
+async function refreshIncidents() {
+  const [ir, ss] = await Promise.all([api("GET", "/ops/incidents?limit=12"), api("GET", "/ops/sessions?limit=8")]);
+  const c = ir.counts;
+  $("#ir-inc").textContent = c.incidents; $("#ir-nm").textContent = c.near_misses;
+  $("#ir-cont").textContent = c.contained; $("#ir-rec").textContent = c.recovered;
+  setPill("#p-ir", c.contained ? "bad" : (c.incidents ? "warn" : "ok"),
+    `incidents ${c.incidents} · near-misses ${c.near_misses}` + (c.contained ? ` · ${c.contained} contained` : ""));
+  $("#incidents").innerHTML = ir.incidents.length ? ir.incidents.slice(0, 6).map(i => `<div class="ir-row">
+      <div class="row">${sevChip(i.severity)}<span class="chip c-${esc(i.status)}">${esc(i.status)}</span><b>${esc(i.rapp_id || "–")}</b><span class="muted mono">#${i.seq}</span></div>
+      <div>${esc(i.kind === "incident" ? "Incident" : "Near-miss")}: ${esc(i.title)}</div>
+      ${i.contained.length ? `<div class="muted">suspended: ${esc(i.contained.join(", "))}</div>` : ""}
+      <div class="row"><button data-ev="${esc(i.session || i.incident_id)}" data-evk="${i.session ? "session" : "incident_id"}">Evidence</button>
+        ${i.status === "contained" ? `<button class="good live-only" data-recover="${esc(i.incident_id)}">Run recovery gate</button>` : ""}</div></div>`).join("")
+    : `<div class="muted">No incident or near-miss yet.</div>`;
+  document.querySelectorAll("[data-recover]").forEach(b => b.onclick = async () => {
+    b.disabled = true;
+    try {
+      const r = await api("POST", `/ops/recover/${b.dataset.recover}`, { operator: "Venugopal (operator)",
+        residual_risk: "Containment layers verified and the incident replays as refused; the agent's sessions stay monitored." });
+      toast(r.ok ? `Recovered: resumed ${r.resumed.join(", ")}` : `Recovery refused: ${r.reason || r.error}`);
+    } catch (e) { toast(e.message); }
+    refreshAll(false);
+  });
+  $("#sessions").innerHTML = ss.sessions.length ? ss.sessions.map(s => {
+    const d = Object.entries(s.decisions).map(([k, v]) => `${v} ${k}`).join(", ");
+    return `<div class="sess"><div><span class="mono">${esc(s.session)}</span>${sevChip(s.severity)}<div class="muted">${esc(s.rapp_id || "")} · ${esc(d)}</div></div>
+      <button data-ev="${esc(s.session)}">Evidence</button></div>`;
+  }).join("") : `<div class="muted">No agent session yet.</div>`;
+}
+function setPill(sel, cls, text) { const p = $(sel); p.className = "pill " + cls; p.innerHTML = `<span class="dot"></span> ${esc(text)}`; }
+function renderFaults() {
+  const f = S.overview.faults;
+  $("#faults").innerHTML = ["policy", "ledger", "twin"].map(k => `<label class="toggle"><input type="checkbox" data-fault="${k}" ${f[k] ? "checked" : ""}> ${k} down</label>`).join("");
+  document.querySelectorAll("[data-fault]").forEach(cb => cb.onchange = async () => {
+    await api("POST", "/ops/faults", { [cb.dataset.fault]: cb.checked }); refreshAll();
+  });
+}
+async function refreshOverview() {
+  S.overview = await api("GET", "/ops/overview");
+  $("#t-enf").checked = S.overview.settings.enforcement; $("#t-scr").checked = S.overview.settings.screening;
+  const off = !S.overview.settings.enforcement || !S.overview.settings.screening;
+  document.body.style.boxShadow = off ? "inset 0 4px 0 var(--deny)" : "";
+  renderRapps(); renderFaults();
+  const fault = Object.entries(S.overview.faults).filter(([, v]) => v).map(([k]) => k);
+  if (fault.length) setPill("#p-twin", "bad", "fault: " + fault.join(", "));
+}
+
+// ---------------------------------------------------------------- polling
+async function poll() {
+  if (S.replay) return;
+  try {
+    const ev = await api("GET", `/ops/events?after=${S.lastEvent}`);
+    if (ev.events.length) {
+      S.lastEvent = ev.last;
+      if (ev.events.some(e => ["twin", "reset", "tick"].includes(e.type))) S.mapDirty = true;
+      await refreshAll(false);
+    }
+    if (S.mapDirty) refreshMap();
+  } catch (e) { setPill("#p-twin", "bad", "gateway down"); }
+}
+async function refreshAll(withMap = true) {
+  try {
+    await refreshOverview();
+    await Promise.all([refreshDecisions(), refreshApprovals(), refreshScreening(), refreshIncidents(),
+      api("GET", "/ops/blast-radius").then(r => { S.radius = r; renderRadiusControls(); })]);
+    if (S.map) { setPill("#p-tick", "ok", "tick " + S.map.state.tick); }
+    if (withMap || S.mapDirty) await refreshMap(); else drawMap();
+  } catch (e) { toast(e.message); }
+}
+
+// ---------------------------------------------------------------- controls
+$("#t-enf").onchange = () => api("POST", "/ops/settings", { enforcement: $("#t-enf").checked }).then(() => refreshAll(false));
+$("#t-scr").onchange = () => api("POST", "/ops/settings", { screening: $("#t-scr").checked }).then(() => refreshAll(false));
+$("#b-verify").onclick = async () => {
+  const r = await api("GET", "/ops/ledger/verify"); const o = $("#ledger-out"); o.style.display = "block";
+  o.innerHTML = r.lines.map(l => `<span class="${l.startsWith("OK") ? "okl" : l.startsWith("FAIL") ? "faill" : ""}">${esc(l)}</span>`).join("\n") + `\n<span class="muted">${r.ms} ms · python verify_ledger.py reproduces this offline</span>`;
+  setPill("#p-ledger", r.ok ? "ok" : "bad", `ledger ${r.ok ? "OK" : "FAIL"} · ${r.records}`);
+};
+$("#b-tamper").onclick = async () => {
+  const r = await api("POST", "/ops/ledger/tamper-test"); const o = $("#ledger-out"); o.style.display = "block";
+  o.innerHTML = `<span class="muted">Copied the chain and flipped record #${r.tampered_seq} from deny to allow:</span>\n` + r.lines.map(l => `<span class="faill">${esc(l)}</span>`).join("\n");
+};
+for (let t = 0; t < 24; t++) $("#s-tick").insertAdjacentHTML("beforeend", `<option value="${t}">${t}</option>`);
+$("#s-tick").onchange = () => api("POST", "/ops/tick", { tick: +$("#s-tick").value }).then(() => { S.mapDirty = true; refreshAll(); });
+$("#b-reset").onclick = () => api("POST", "/ops/reset", {}).then(() => { S.mapDirty = true; refreshAll(); });
+$("#b-agent").onclick = async () => {
+  const o = $("#op-out"); o.style.display = "block"; o.textContent = "asking the RL agent…";
+  try {
+    const r = await api("POST", "/ops/demo/agent", {});
+    o.textContent = r.error ? r.error : `agent ${r.proposal.agent} at tick ${r.proposal.tick} proposes ${r.proposal.actions.length} change(s):\n${actStr(r.proposal.actions)}\n` +
+      (r.outcome ? `submitted ${r.submitted.length} → ${r.outcome.decision} ${r.outcome.policy_id || ""} ${r.outcome.reason || ""}` : "nothing submitted");
+  } catch (e) { o.textContent = e.message; }
+  refreshAll();
+};
+
+// ---------------------------------------------------------------- replay (NF-7)
+$("#b-replay").onclick = async () => {
+  if (S.replay) { clearInterval(S.replay.timer); S.replay = null; document.body.classList.remove("replay"); $("#b-replay").textContent = "Replay mode"; renderLog(); refreshAll(); return; }
+  const r = await api("GET", "/ops/replay");
+  S.replay = { records: r.records, pos: r.records.length };
+  document.body.classList.add("replay"); $("#b-replay").textContent = "Back to live";
+  $("#replay-info").textContent = `${r.records.length} stored records · ${r.summary}`;
+  const sl = $("#replay-slider"); sl.max = r.records.length; sl.value = r.records.length;
+  const upd = () => { S.replay.pos = +sl.value; const rec = S.replay.records[S.replay.pos - 1]; $("#replay-pos").textContent = rec ? `#${rec.seq} ${fmtTime(rec.time)}` : "start"; renderLog(new Set(rec ? [rec.seq] : [])); };
+  sl.oninput = upd; upd();
+  $("#b-replay-play").onclick = () => {
+    clearInterval(S.replay.timer); sl.value = 0; upd();
+    S.replay.timer = setInterval(() => { if (+sl.value >= +sl.max) return clearInterval(S.replay.timer); sl.value = +sl.value + 1; upd(); }, 700);
+  };
+};
+
+// ---------------------------------------------------------------- autoplay (?autoplay=1): unattended D1–D5 for recording
+const AUTOPLAY = new URLSearchParams(location.search).has("autoplay");
+window.__marks = [];
+function mark(name) { window.__marks.push({ name, t: performance.now() / 1000 }); }
+function caption(text) {
+  let c = document.getElementById("ap-caption");
+  if (!c) {
+    c = document.createElement("div"); c.id = "ap-caption";
+    c.style.cssText = "position:fixed;left:24px;bottom:24px;z-index:20;background:#0F1B2D;color:#F4F3EE;font:600 30px system-ui,'Segoe UI',sans-serif;padding:14px 26px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.35)";
+    document.body.appendChild(c);
+  }
+  c.textContent = text;
+}
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+function resultCard(title, html) {  // the step's outcome in readable type, for the recording
+  let c = document.getElementById("ap-result");
+  if (!c) {
+    c = document.createElement("div"); c.id = "ap-result";
+    c.style.cssText = "position:fixed;left:560px;right:440px;bottom:120px;z-index:19;background:var(--panel);color:var(--text);border:2px solid var(--accent);border-radius:14px;padding:22px 28px;font-size:21px;line-height:1.5;box-shadow:0 10px 40px rgba(0,0,0,.3);max-height:620px;overflow:hidden;overflow-wrap:anywhere";
+    document.body.appendChild(c);
+  }
+  c.innerHTML = `<div style="font-weight:700;font-size:24px;margin-bottom:10px">${esc(title)}</div>` + html.replace(/<a [^>]*data-raw[^>]*>details<\/a>/g, "");
+  c.style.display = html ? "block" : "none";
+}
+async function autoplay() {
+  document.body.style.zoom = "0.8";
+  await sleep(4000); mark("start");
+  const titles = { D1: "D1 · Two agents, two valid intents", D2: "D2 · Planned event: the load-balancing agent rebalances",
+                   D3: "D3 · Slow drift: each switch-off looks harmless", D4: "D4 · Workaround: draining a refused cell",
+                   D5: "D5 · Audit the ledger, then pause an agent",
+                   D6: "D6 · Incident: canary, automatic containment, recovery gate" };
+  const decide = { D2: ["1", "D2 · Human approves: the prediction shows the intent served"],
+                   D3: ["0", "D3 · Human rejects: it would undo the other agent's intent"],
+                   D4: ["0", "D4 · Human rejects the workaround"] };
+  for (const [id] of STEPS) {
+    caption(titles[id]); mark(id + ":start");
+    resultCard("", "");
+    await runStep(id);
+    mark(id + ":done");
+    const r = S.stepResults[id];
+    if (r) resultCard(`${titles[id]} — ${r.pass ? "pass" : "check"}`, r.html);
+    if (decide[id]) {
+      await sleep(4500);  // the prediction and the reason on screen before the human decides
+      const btn = document.querySelector(`[data-ap][data-v="${decide[id][0]}"]`);
+      if (btn) { caption(decide[id][1]); btn.click(); mark(id + ":decided"); }
+      await sleep(3000);
+    }
+    if (id === "D5") { $("#b-tamper").click(); await sleep(1500); }
+    await sleep(4500);  // time to read the result card
+  }
+  resultCard("", "");
+  caption("Every decision: enforced, signed and verifiable"); mark("end");
+  await sleep(3000);
+  window.__autoplayDone = true;
+}
+
+renderSteps();
+refreshAll().then(() => { setInterval(poll, 1000); if (AUTOPLAY) autoplay(); });
+api("POST", "/ops/demo/mode", {}).then(m => {
+  const ok = m.energy_saving.ok && m.load_balancing.ok;
+  setPill("#p-agents", ok ? "ok" : "warn", ok ? `agents: Strands · ${m.energy_saving.detail}` : "agents: scripted");
+  $("#p-agents").title = ok ? "Strands agents through the MCP gateway" : m.energy_saving.detail;
+}).catch(() => {});
+api("GET", "/ops/ledger/verify").then(r => setPill("#p-ledger", r.ok ? "ok" : "bad", `ledger ${r.ok ? "OK" : "FAIL"} · ${r.records}`)).catch(() => {});
+</script>
+</body>
+</html>

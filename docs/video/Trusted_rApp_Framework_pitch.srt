@@ -1,0 +1,55 @@
+1
+00:00:00,000 --> 00:00:13,190
+Operators want AI agents to run the radio network. Today they cannot let them, because nothing guarantees what an agent will do. This is the Trusted rApp Framework, from HCLTech.
+
+2
+00:00:13,890 --> 00:00:35,230
+O-RAN opens the S M O to rApps from any vendor. Those rApps are becoming AI agents that read alarms and tickets, text that anyone can forge. And the safeguards operators rely on, protected-site lists, change caps and change boards, are manual. Nothing enforces them where an agent acts.
+
+3
+00:00:35,920 --> 00:00:58,380
+We measured this. A Claude-based agent refused most crude prompt injections on its own. But a believable, forged maintenance ticket made it switch off the busiest critical cell in two of three runs. With our framework on, nothing harmful ran, in any run. The model is not the control. The boundary is.
+
+4
+00:00:59,080 --> 00:01:21,760
+Every agent action is a tool call through one enforcement point at the S M O boundary. It checks identity, screens untrusted text, and applies Cedar policy, a blast-radius budget and a risk tier. Low-risk changes run. High-risk changes are replayed on the twin and wait for a human. Every decision is signed.
+
+5
+00:01:22,460 --> 00:01:34,910
+Both rApps are real Strands agents: our energy saving agent, which uses the MAVERIC reinforcement-learning model as a tool, and an untrusted vendor agent. Let's see it live.
+
+6
+00:01:35,610 --> 00:01:48,930
+Step one. Both rApps submit their cards. The energy saving agent is admitted with a scope. The vendor's request for cell-off rights is refused, and the policy I D is shown.
+
+7
+00:01:49,630 --> 00:02:04,800
+Step two. The agent switches off cell two one, the least-loaded cell it may switch off without approval, and explains why. A request for the critical hub cell is denied by policy, and so is any write from the vendor.
+
+8
+00:02:05,500 --> 00:02:24,560
+Step three. The agent asks to switch off all of site three. That is high risk, so it is replayed on the twin first: weak coverage rises from thirty-six to forty-two percent, and energy saving to twenty-seven percent. A human reads that, and approves.
+
+9
+00:02:25,260 --> 00:02:44,580
+Step four, the attack. A forged ticket and a crude injection reach the vendor agent. This time Claude held off on its own, but a fully fooled agent switches off the hub cell when defenses are off. With defenses on, nothing changes. Every attempt is denied.
+
+10
+00:02:45,280 --> 00:02:58,960
+Step five. The ledger verifies offline. A tampered copy fails at the exact record. And the kill switch revokes the vendor: its next call is refused in thirty-seven milliseconds.
+
+11
+00:02:59,660 --> 00:03:18,240
+Our benchmark, TelcoAgentBench, runs twenty fixed scenarios with the real agent. Defenses off: six of fifteen attacks blocked. Defenses on: fifteen of fifteen, even with screening switched off. No normal request was wrongly denied.
+
+12
+00:03:18,940 --> 00:03:27,250
+And it is cheap: about four cents of model cost per decision, and under twenty-five milliseconds of enforcement overhead.
+
+13
+00:03:27,960 --> 00:03:41,930
+The same agent code and the same Cedar policies move to AWS: AgentCore Runtime, Gateway, Policy and Identity, Bedrock Guardrails, and a ledger signed with K M S on S3 Object Lock.
+
+14
+00:03:42,620 --> 00:03:53,900
+The Trusted rApp Framework turns operators' manual safeguards into enforced, provable policy, so they can finally trust agents with the network. Thank you.

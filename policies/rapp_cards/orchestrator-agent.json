@@ -1,0 +1,11 @@
+{
+  "rapp_id": "orchestrator-agent",
+  "vendor": "HCLTech",
+  "version": "0.1",
+  "purpose": "Orchestrator agent: splits operator intents into tasks for the domain agents; reads the network, changes nothing itself",
+  "requested_actions": ["read_kpi", "what_if"],
+  "requested_cells": "all",
+  "max_cells_per_tick": 0,
+  "reads_untrusted_input": false,
+  "autonomy_tier": "supervised"
+}

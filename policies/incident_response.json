@@ -1,0 +1,7 @@
+{
+  "_note": "SI control policy (NIST CAISSI/NSA/CISA Key Practices 1.6, 2.1, 6.1-6.3): severity of a detected incident or near-miss -> automatic responses. Severity rules are in framework/incidents.py. Responses: end_session = shut down the agent's trajectory (later calls in that session are refused); suspend_agent = no call from the agent until the recovery gate passes; pause_similar = also suspend admitted agents from the same vendor or on the same model; flag_for_review = listed for the operator, no containment.",
+  "S1": ["end_session", "suspend_agent", "pause_similar"],
+  "S2": ["end_session", "flag_for_review"],
+  "S3": ["flag_for_review"],
+  "S4": []
+}

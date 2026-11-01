@@ -1,0 +1,7 @@
+{
+  "_note": "Blast radius budget per agent: max distinct cells changed per hour (policy data). Granted budget = min(card request, this value).",
+  "energy-saving-rl": 3,
+  "load-balancing-agent": 6,
+  "third-party-demo": 0,
+  "default": 1
+}

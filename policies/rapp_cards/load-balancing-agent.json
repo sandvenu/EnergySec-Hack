@@ -1,0 +1,40 @@
+{
+  "rapp_id": "load-balancing-agent",
+  "vendor": "HCLTech",
+  "version": "0.1",
+  "purpose": "Load-balancing agent: spread users so no cell is overloaded, e.g. during planned events",
+  "requested_actions": [
+    "read_kpi",
+    "what_if",
+    "set_tilt",
+    "cell_on"
+  ],
+  "requested_cells": "all",
+  "max_cells_per_tick": 6,
+  "reads_untrusted_input": false,
+  "autonomy_tier": "supervised",
+  "intent": {
+    "owner": "RAN capacity team",
+    "goal": "Keep every cell below capacity during busy hours and planned events",
+    "objective": {
+      "kpi": "max_cell_load",
+      "direction": "minimize"
+    },
+    "guards": [
+      {
+        "kpi": "max_cell_load",
+        "max": 250,
+        "why": "no cell above 250 users"
+      },
+      {
+        "kpi": "excess_ues",
+        "max_increase": 20,
+        "why": "others may push at most 20 more users above cell capacity than this agent left"
+      }
+    ]
+  },
+  "model_budget": {
+    "max_tokens_per_run": 250000,
+    "max_usd_per_day": 5.0
+  }
+}

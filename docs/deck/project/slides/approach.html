@@ -1,0 +1,37 @@
+<section id="approach" data-transition="fade" style="background:#F4F3EE;color:#14202F;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#1D5C96;letter-spacing:2px;text-transform:uppercase">The framework</p>
+<h2 style="font-size:72px;font-weight:600;line-height:1.1">One enforcement point for every agent action</h2>
+<div style="display:flex;align-items:stretch;gap:16px">
+<div style="flex:1;background:#0F1B2D;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:32px;font-weight:600;color:#F4F3EE">rApp agents</h3>
+<p style="font-size:24px;line-height:1.4;color:#B9C5D2">Strands agents with only a gateway token</p>
+</div>
+<x-shape kind="arrow-right" style="width:56px;height:28px;background:#1D5C96;align-self:center"></x-shape>
+<div style="flex:1;background:#FBFAF7;border:2px solid #1D5C96;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:32px;font-weight:600">1 · Request checks</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5563">identity, kill switch, screening, budget, risk tier</p>
+</div>
+<x-shape kind="arrow-right" style="width:56px;height:28px;background:#1D5C96;align-self:center"></x-shape>
+<div style="flex:1;background:#FBFAF7;border:2px solid #1D5C96;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:32px;font-weight:600">2 · Cedar policy</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5563">scope per tool call; every denial names its policy</p>
+</div>
+<x-shape kind="arrow-right" style="width:56px;height:28px;background:#1D5C96;align-self:center"></x-shape>
+<div style="flex:1;background:#FBFAF7;border:2px solid #1D5C96;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:32px;font-weight:600">3 · Output screening</h3>
+<p style="font-size:24px;line-height:1.4;color:#4A5563">untrusted text quarantined before the model reads it</p>
+</div>
+<x-shape kind="arrow-right" style="width:56px;height:28px;background:#1D5C96;align-self:center"></x-shape>
+<div style="flex:1;background:#0F1B2D;border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:32px;font-weight:600;color:#F4F3EE">Digital twin</h3>
+<p style="font-size:24px;line-height:1.4;color:#B9C5D2">MAVERIC, 15 cells; accepts the gateway only</p>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px">
+<p style="font-size:28px;line-height:1.4;background:#FBFAF7;border:1px solid #DAD7CE;border-radius:12px;padding:24px"><b>Low risk:</b> runs at once</p>
+<p style="font-size:28px;line-height:1.4;background:#FBFAF7;border:1px solid #DAD7CE;border-radius:12px;padding:24px"><b>High risk:</b> shadow run on the twin, then a human decides</p>
+<p style="font-size:28px;line-height:1.4;background:#FBFAF7;border:1px solid #DAD7CE;border-radius:12px;padding:24px"><b>Every outcome:</b> one signed, hash-chained ledger record</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;font-size:24px;color:#4A5563">Trusted rApp Framework · 04</p>
+<aside>Every action an agent takes is a tool call through one gateway at the SMO boundary, the same shape as Amazon Bedrock AgentCore Gateway. Three stages: request checks (identity, kill switch, screening of what the agent says, the change budget and the risk tier), a Cedar policy over the tool call, and screening of untrusted text on the way back, so a poisoned alarm is quarantined before the model ever reads it. The twin accepts commands only from the gateway, so no agent can go around it. Low-risk actions run; high-risk ones are replayed on the twin first and wait for a human. And every outcome is written to a signed ledger. If any dependency is down, the action is denied: it fails closed.</aside>
+</section>

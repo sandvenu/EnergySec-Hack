@@ -1,0 +1,8 @@
+{
+  "_note": "Proposed tags (P3 section 6): site 5 (central) critical, sites 1 and 4 medium, sites 2 and 3 low. To be confirmed by RAN colleagues.",
+  "cell_1_0": "medium", "cell_1_1": "medium", "cell_1_2": "medium",
+  "cell_2_0": "low", "cell_2_1": "low", "cell_2_2": "low",
+  "cell_3_0": "low", "cell_3_1": "low", "cell_3_2": "low",
+  "cell_4_0": "medium", "cell_4_1": "medium", "cell_4_2": "medium",
+  "cell_5_0": "critical", "cell_5_1": "critical", "cell_5_2": "critical"
+}

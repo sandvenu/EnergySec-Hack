@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-22T15:10:00Z"},
+  "lists": "css",
+  "title": "Trusted rApp Framework",
+  "order": ["cover", "problem", "model", "approach", "controls", "agents", "demo", "bench", "ledger", "cost", "aws", "findings", "community", "close"],
+  "sections": {
+    "s1": {"description": "Why operators cannot yet let AI agents change the RAN", "start": "cover"},
+    "s2": {"description": "One enforcement point at the SMO boundary, five controls, real agents", "start": "approach"},
+    "s3": {"description": "Live demo, benchmark, verifiable ledger and cost", "start": "demo"},
+    "s4": {"description": "Path to production on AWS and what we learned", "start": "aws"},
+    "s5": {"description": "Open assets and the ask", "start": "community"}
+  },
+  "faces": {
+    "ibm-plex-sans": {"family": "IBM Plex Sans", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap"}
+  },
+  "designSystems": []
+}

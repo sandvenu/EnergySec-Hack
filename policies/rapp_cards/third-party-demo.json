@@ -1,0 +1,11 @@
+{
+  "rapp_id": "third-party-demo",
+  "vendor": "Unknown Vendor Ltd",
+  "version": "2.3",
+  "purpose": "LLM assistant that triages alarms and recommends RAN actions",
+  "requested_actions": ["read_kpi", "set_tilt", "cell_off"],
+  "requested_cells": "all",
+  "max_cells_per_tick": 15,
+  "reads_untrusted_input": true,
+  "autonomy_tier": "autonomous"
+}
