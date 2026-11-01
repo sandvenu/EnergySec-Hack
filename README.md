@@ -1,4 +1,38 @@
-# Trusted rApp Framework for Open RAN — standalone build
+Primary track: track-3 (Multi-Agent Swarms for Application Enablement through NLMs), team07
+
+# Trusted rApp Framework for Open RAN
+
+**Problem.** Operators will not let agents act on a RAN without policy, an audit trail and a human approval point.
+Per-call policy is not enough: agents whose every call is allowed can still, together, break another team's goal.
+We add a system-level impact assessment on a digital twin's prediction, and sign every decision into a ledger.
+
+## Hackathon submission (FYUZ 2026)
+
+| | |
+|---|---|
+| Team account, region | team07, `041915167631`, us-east-2 |
+| Agents' model | Bedrock `us.anthropic.claude-opus-5-5`, Bedrock Guardrails on alarm text and model calls |
+| Architecture | AgentCore Gateway (REQUEST/RESPONSE interceptors, Cedar Policy) → SMO enforcement point on EC2 (MAVERIC twin, impact assessment) → KMS-signed ledger in S3 Object Lock; agents on AgentCore Runtime with AgentCore Identity; events Kinesis → S3 → Athena. See [docs/AWS_PORT.md](docs/AWS_PORT.md) |
+| Track 3 units | live **deny**, live **allow**, **pause** (kill switch, withdrawn agent refused), rebuilt **trace** (one session id from first request to last action) |
+| Evidence | [judging.json](judging.json), [DATA.md](DATA.md), [GAPS.md](GAPS.md), `evidence/declared/<run_id>.json` |
+
+| Stage | One command (from `trusted-rapp/`) |
+|---|---|
+| Build bundles | `infra\.venv\Scripts\python.exe infra\build_host_bundle.py` then `infra\build_runtime_bundle.py` |
+| Deploy | `cd infra; cdk deploy` (profile `fyuz`; no `cdk bootstrap`: assets go to the team bucket) |
+| Demo page | the `DemoPageTunnel` stack output (SSM port forward), then http://127.0.0.1:8700 |
+| Benchmark | `python -m bench.run_bench` |
+| Tests | `python -m pytest -q tests` |
+| Rebuild (offline) | `python verify_ledger.py <chain.jsonl> --pubkey <pem>` and `python verify_ledger.py --evidence <package.json>` |
+
+**Before Nov 1.** The framework, agents, benchmark and CDK app were built Oct 22–28, 2026 and ran on a laptop
+(Claude API). During the event we ported it to the team account: us-east-2, Bedrock instead of the Claude API,
+every IAM role under `/bb26/` with the account's boundary, and assets published without `cdk bootstrap`.
+Git history starts with the pre-event state (`Baseline` commit) so the difference is visible.
+
+---
+
+The rest of this README describes the framework as built (standalone build first, AWS build second).
 
 An extra layer of checks and balances for agentic rApps at the SMO boundary, demonstrated on the
 MAVERIC digital twin (TIP Breaking Barriers, Security & Traceability stream).

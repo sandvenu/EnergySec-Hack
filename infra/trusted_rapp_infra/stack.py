@@ -204,7 +204,7 @@ class TrustedRappStack(Stack):
                                     allow_all_outbound=True)
         target_sg = ec2.SecurityGroup(self, "TargetSg", vpc=vpc, description="Gateway tool target Lambda",
                                       allow_all_outbound=True)
-        host_sg.add_ingress_rule(target_sg, ec2.Port.tcp(PEP_PORT), "AgentCore Gateway tool target -> SMO /v1")
+        host_sg.add_ingress_rule(target_sg, ec2.Port.tcp(PEP_PORT), "AgentCore Gateway tool target to SMO /v1")  # EC2 rejects '>'
 
         host_role = iam.Role(self, "HostRole", assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"),
                              managed_policies=[iam.ManagedPolicy.from_aws_managed_policy_name("AmazonSSMManagedInstanceCore"),
