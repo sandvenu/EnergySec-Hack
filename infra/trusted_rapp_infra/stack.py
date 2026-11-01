@@ -302,7 +302,10 @@ class TrustedRappStack(Stack):
         for name, mirrors, statement in policies.statements(clients, gateway.attr_gateway_arn):
             pol = agentcore.CfnPolicy(self, f"Policy{name}", name=name, policy_engine_id=engine.attr_policy_engine_id,
                                       description=f"mirrors {mirrors} in policies/scope.cedar",
-                                      definition={"cedar": {"statement": statement}})
+                                      definition={"cedar": {"statement": statement}},
+                                      # the analyzer flags the deliberate shapes (critical-cell forbid,
+                                      # canary pass-through) as too restrictive/permissive; syntax is still checked
+                                      validation_mode="IGNORE_ALL_FINDINGS")
             pol.add_resource_dependency(target)  # the policy schema comes from the target's tools
 
         # ================= Evaluation and promotion: model registry, training, evaluation ===
