@@ -6,7 +6,7 @@ import os
 import boto3
 
 STACK = os.environ.get("TRUSTED_RAPP_STACK", "TrustedRapp")
-REGION = os.environ.get("AWS_REGION", os.environ.get("AWS_DEFAULT_REGION", "us-east-1"))
+REGION = os.environ.get("AWS_REGION", os.environ.get("AWS_DEFAULT_REGION", "us-east-2"))
 
 
 @functools.lru_cache()

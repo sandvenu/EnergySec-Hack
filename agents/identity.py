@@ -53,7 +53,7 @@ def _from_agentcore_identity(prefix: str):
     workload_token = BedrockAgentCoreContext.get_workload_access_token()
     if not workload_token:  # not inside AgentCore Runtime
         return None
-    client = IdentityClient(os.environ.get("AWS_REGION", "us-east-1"))
+    client = IdentityClient(os.environ.get("AWS_REGION", "us-east-2"))
     token = _run(client.get_token(provider_name=provider, agent_identity_token=workload_token,
                                   scopes=[os.environ["COGNITO_SCOPE"]], auth_flow="M2M"))
     return token, _ttl(token)

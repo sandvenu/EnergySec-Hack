@@ -3,7 +3,7 @@
 # you, sent to Secrets Manager, and the file is deleted. It never appears in code, templates or chat.
 #
 #   powershell -ExecutionPolicy Bypass -File scripts\aws\set_anthropic_key.ps1
-param([string]$Stack = "TrustedRapp", [string]$Region = "us-east-1")
+param([string]$Stack = "TrustedRapp", [string]$Region = "us-east-2")
 $ErrorActionPreference = "Stop"
 $arn = aws cloudformation describe-stacks --stack-name $Stack --region $Region --query "Stacks[0].Outputs[?OutputKey=='AnthropicKeySecretArn'].OutputValue" --output text
 if (-not $arn -or $arn -eq "None") { throw "Stack $Stack has no AnthropicKeySecretArn output (deployed with modelProvider=anthropic?)" }
