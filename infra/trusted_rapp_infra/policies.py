@@ -63,8 +63,10 @@ def statements(clients: Dict[str, str], gateway_arn: str) -> List[Tuple[str, str
          f"when {{ context.input.cell_ids.containsAny({_set(critical)}) }};"),
         ("orch_read_only", "ORCH-READ-ONLY",
          f"forbid(principal == {who('orch')}, action in {acts(['cell_off', 'cell_on', 'set_tilt', 'read_alarms'])}, resource == {gw});"),
-        # The canary must reach the SMO, which denies it, records the S1 incident and contains the caller.
-        # Any principal: only the four agent clients can authenticate to the gateway at all.
-        ("canary_to_smo", "CANARY-TRIPPED", f"permit(principal, action == {action('bulk_reset_site')}, resource == {gw});"),
     ]
+    # The canary must reach the SMO, which denies it, records the S1 incident and contains the caller.
+    # One permit per agent client: AgentCore Policy refuses an "any principal" permit as overly permissive.
+    out += [(f"canary_to_smo_{key}", "CANARY-TRIPPED",
+             f"permit(principal == {who(key)}, action == {action('bulk_reset_site')}, resource == {gw});")
+            for key in ("es", "lb", "vendor", "orch")]
     return out

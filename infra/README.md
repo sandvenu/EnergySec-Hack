@@ -23,7 +23,7 @@ Switching later is `cdk deploy -c modelProvider=bedrock`. Locally, the standalon
 |---|---|---|
 | Agentic Network Framework | **AgentCore Gateway** | The agents' only route to the network (MCP). JWT authorizer accepts only the four agent clients. |
 | | **Gateway interceptors** (Lambda, REQUEST + RESPONSE) | REQUEST: maps the caller's Cognito client to its rApp and overwrites `_caller` (no spoofing). RESPONSE: Bedrock Guardrails screens alarm text before the model reads it; hides internal arguments from `tools/list`. |
-| | **AgentCore Policy** (Cedar, ENFORCE) | 11 policies generated from `policies/scope.cedar` (`infra/trusted_rapp_infra/policies.py`): per-agent tool scope, no switch-off of critical cells, orchestrator read-only, and the canary passed through to the SMO (which denies it and contains the caller). Same policy IDs as the SMO's own checks. |
+| | **AgentCore Policy** (Cedar, ENFORCE) | 14 policies generated from `policies/scope.cedar` (`infra/trusted_rapp_infra/policies.py`): per-agent tool scope, no switch-off of critical cells, orchestrator read-only, and the canary passed through to the SMO (which denies it and contains the caller). Same policy IDs as the SMO's own checks. |
 | | **AgentCore Identity** | One OAuth2 credential provider per agent (Cognito client credentials); agents on Runtime get tokens without holding secrets. |
 | | **AgentCore Runtime** (×4, direct code deploy, ARM64) | Energy, load-balancing, vendor and orchestrator agents (Strands). The orchestrator calls the others with `InvokeAgentRuntime`. |
 | | **Bedrock** + **Guardrails** | Agents' model (`modelId` in `cdk.json`), prompt-attack guardrail on alarm text and on agent model calls. |
