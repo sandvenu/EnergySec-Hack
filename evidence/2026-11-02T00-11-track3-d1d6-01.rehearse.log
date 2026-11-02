@@ -1,0 +1,7 @@
+﻿2026-11-02T00:11:58Z
+2026-11-02T00:13:34Z
+run 1: PASS {'D1': True, 'D2': True, 'D3': True, 'D4': True, 'D5': True, 'D6': True} 95.8s | modes {'D1': 'agent', 'D2': 'agent', 'D3': 'scripted', 'D4': 'scripted'}
+   decisions: {'D1': [('allow', 'Novel')], 'D2': [('pending_approval', 'Novel')], 'D3': [('allow', 'Overlap'), ('pending_approval', 'Drift')], 'D4': [('deny', None), ('pending_approval', 'Workaround')]}
+   D2 max load 324 -> 244 | guards after D3 True after D4 True | OK: 25 records checked | pause->refusal 101.9 ms
+exit=0
+
