@@ -30,5 +30,23 @@ None blocked us for long. Three deploy attempts failed on our own template, each
 | 2026-11-01 23:03 | AgentCore Policy | `Overly Permissive: Policy Engine will allow every request ... (smo-tools___bulk_reset_site)` | RequestToken 6f9598ce-33a2-1404-6591-6b9f8a489e38 | `1c71d5a` (one canary permit per agent client) |
 | 2026-11-02 00:03 (approx.) | AgentCore Policy | `Overly Restrictive: Policy Engine will deny every request ... (smo-tools___cell_off)` on `global_no_off_critical` | RequestToken a9dd751f-f3c2-1bfc-f318-68ef3d4c10bd | `31e35f3` (ValidationMode) |
 
+### Run 2026-11-02T12-33-track3-d1d6-02 did not finish
+
+The first attempt to record the demo video, declared at 12:32 UTC. D1 passed (ledger seq 36–43). D2's live
+load-balancing plan was held for a human at 12:45:28 (seq 50, `TIER-DEFAULT-HIGH`). Then the SSM port-forward
+from the laptop to the twin host was closed by the network:
+`write tcp 192.168.1.6:61435->3.146.14.246:443: wsasend: An existing connection was forcibly closed by the remote host`.
+The page's approve click never reached the host, and the hold was rejected on timeout at 12:50:28 (seq 52,
+`AP-TIMEOUT`, after the 300 s approval timeout). The framework behaved as designed: an unanswered hold is rejected,
+not run. D3–D6 did not run. Records 36–52 stay in the ledger. The next run was declared after this one.
+
+### Run 2026-11-02T12-56-track3-d1d6-03 did not finish
+
+The second attempt, on a fresh tunnel. D1, D2 (approved, seq 69) and D3 (drift held and rejected, seq 72–74) ran
+and passed. At about 12:59:30 the network closed the tunnel again, before D4's request reached the host, so D4–D6
+did not run. Records 53–74 stay in the ledger. After two drops in 20 minutes, the next run was driven on the twin
+host itself (`scripts.rehearse` through SSM Run Command), with the laptop only watching the page through a tunnel
+that reconnects itself.
+
 Account guardrails we designed around (not blocks): every IAM role under `/bb26/` with `bb26-Boundary` (CDK Aspect in
 `infra/app.py`), and no `cdk bootstrap` (assets go to the team bucket with the CLI's own credentials).

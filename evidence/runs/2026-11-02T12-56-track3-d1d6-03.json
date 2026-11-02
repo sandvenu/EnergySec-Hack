@@ -1,0 +1,196 @@
+{
+  "run_id": "2026-11-02T12-56-track3-d1d6-03",
+  "team_code": "team07",
+  "started": "2026-11-02T12:57:08.579+00:00",
+  "ended": "2026-11-02T12:59:29.864+00:00",
+  "sessions": [
+    "es-a40d26996a",
+    "lb-4126e46bed",
+    "stage-lb-28170fa61e",
+    "d3-es-119ccdb454"
+  ],
+  "ledger_bucket": "trustedrapp-ledgerbucket136870b6-cybudg1kg1lo",
+  "ledger_seq": [
+    53,
+    74
+  ],
+  "records": 22,
+  "decisions": [
+    {
+      "seq": 53,
+      "time": "2026-11-02T12:57:08.579+00:00",
+      "session": null,
+      "rapp_id": "energy-saving-rl",
+      "decision": "admit",
+      "policy_id": null
+    },
+    {
+      "seq": 54,
+      "time": "2026-11-02T12:57:08.751+00:00",
+      "session": null,
+      "rapp_id": "load-balancing-agent",
+      "decision": "admit",
+      "policy_id": null
+    },
+    {
+      "seq": 55,
+      "time": "2026-11-02T12:57:08.912+00:00",
+      "session": null,
+      "rapp_id": "incomplete-card",
+      "decision": "refuse",
+      "policy_id": "CARD-INVALID"
+    },
+    {
+      "seq": 56,
+      "time": "2026-11-02T12:57:14.357+00:00",
+      "session": null,
+      "rapp_id": "energy-saving-rl",
+      "decision": "allow",
+      "policy_id": "ES-READ"
+    },
+    {
+      "seq": 57,
+      "time": "2026-11-02T12:57:14.580+00:00",
+      "session": "es-a40d26996a",
+      "rapp_id": "energy-saving-rl",
+      "decision": "allow",
+      "policy_id": "ES-READ"
+    },
+    {
+      "seq": 58,
+      "time": "2026-11-02T12:57:19.399+00:00",
+      "session": "es-a40d26996a",
+      "rapp_id": "energy-saving-rl",
+      "decision": "allow",
+      "policy_id": "ES-READ"
+    },
+    {
+      "seq": 59,
+      "time": "2026-11-02T12:57:26.808+00:00",
+      "session": "es-a40d26996a",
+      "rapp_id": "energy-saving-rl",
+      "decision": "allow",
+      "policy_id": "ES-OFF-LOW"
+    },
+    {
+      "seq": 60,
+      "time": "2026-11-02T12:57:36.260+00:00",
+      "session": "es-a40d26996a",
+      "rapp_id": "energy-saving-rl",
+      "decision": "trace",
+      "policy_id": null
+    },
+    {
+      "seq": 61,
+      "time": "2026-11-02T12:57:47.824+00:00",
+      "session": "lb-4126e46bed",
+      "rapp_id": "load-balancing-agent",
+      "decision": "allow",
+      "policy_id": "LB-READ"
+    },
+    {
+      "seq": 62,
+      "time": "2026-11-02T12:57:57.186+00:00",
+      "session": "lb-4126e46bed",
+      "rapp_id": "load-balancing-agent",
+      "decision": "allow",
+      "policy_id": "LB-READ"
+    },
+    {
+      "seq": 63,
+      "time": "2026-11-02T12:57:57.246+00:00",
+      "session": "lb-4126e46bed",
+      "rapp_id": "load-balancing-agent",
+      "decision": "allow",
+      "policy_id": "LB-READ"
+    },
+    {
+      "seq": 64,
+      "time": "2026-11-02T12:57:59.148+00:00",
+      "session": "lb-4126e46bed",
+      "rapp_id": "load-balancing-agent",
+      "decision": "allow",
+      "policy_id": "LB-READ"
+    },
+    {
+      "seq": 65,
+      "time": "2026-11-02T12:58:23.063+00:00",
+      "session": "lb-4126e46bed",
+      "rapp_id": "load-balancing-agent",
+      "decision": "allow",
+      "policy_id": "LB-READ"
+    },
+    {
+      "seq": 66,
+      "time": "2026-11-02T12:58:23.122+00:00",
+      "session": "lb-4126e46bed",
+      "rapp_id": "load-balancing-agent",
+      "decision": "allow",
+      "policy_id": "LB-READ"
+    },
+    {
+      "seq": 67,
+      "time": "2026-11-02T12:58:41.801+00:00",
+      "session": "lb-4126e46bed",
+      "rapp_id": "load-balancing-agent",
+      "decision": "hold",
+      "policy_id": "TIER-DEFAULT-HIGH"
+    },
+    {
+      "seq": 68,
+      "time": "2026-11-02T12:58:52.794+00:00",
+      "session": "lb-4126e46bed",
+      "rapp_id": "load-balancing-agent",
+      "decision": "trace",
+      "policy_id": null
+    },
+    {
+      "seq": 69,
+      "time": "2026-11-02T12:58:59.958+00:00",
+      "session": "lb-4126e46bed",
+      "rapp_id": "load-balancing-agent",
+      "decision": "approve",
+      "policy_id": "AP-HUMAN-APPROVE"
+    },
+    {
+      "seq": 70,
+      "time": "2026-11-02T12:59:09.983+00:00",
+      "session": "stage-lb-28170fa61e",
+      "rapp_id": "load-balancing-agent",
+      "decision": "hold",
+      "policy_id": "TIER-DEFAULT-HIGH"
+    },
+    {
+      "seq": 71,
+      "time": "2026-11-02T12:59:10.067+00:00",
+      "session": "stage-lb-28170fa61e",
+      "rapp_id": "load-balancing-agent",
+      "decision": "approve",
+      "policy_id": "AP-HUMAN-APPROVE"
+    },
+    {
+      "seq": 72,
+      "time": "2026-11-02T12:59:17.382+00:00",
+      "session": "d3-es-119ccdb454",
+      "rapp_id": "energy-saving-rl",
+      "decision": "allow",
+      "policy_id": "ES-OFF-LOW"
+    },
+    {
+      "seq": 73,
+      "time": "2026-11-02T12:59:20.924+00:00",
+      "session": "d3-es-119ccdb454",
+      "rapp_id": "energy-saving-rl",
+      "decision": "hold",
+      "policy_id": "ASSESS-DRIFT"
+    },
+    {
+      "seq": 74,
+      "time": "2026-11-02T12:59:29.864+00:00",
+      "session": "d3-es-119ccdb454",
+      "rapp_id": "energy-saving-rl",
+      "decision": "reject",
+      "policy_id": "AP-HUMAN-REJECT"
+    }
+  ]
+}
